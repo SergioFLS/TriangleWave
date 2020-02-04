@@ -21,6 +21,7 @@ unsigned score = 0;
 struct ObjectPlayer {
   int8_t x = 10;
   int8_t y = 26;
+  bool started = 0;
 } obj_player;
 
 struct ObjectBullet {
@@ -42,6 +43,7 @@ void reset() {
   score = 0;
   obj_player.x = 10;
   obj_player.y = 24;
+  obj_player.started = 0;
   for (int i=0; i < 3; i++) {
     obj_bullet[i].active = 0;
   }

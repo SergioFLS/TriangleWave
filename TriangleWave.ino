@@ -31,10 +31,16 @@ void inggame() {
   }
   arduboy.pollButtons();
 
-  if (arduboy.pressed(UP_BUTTON)) {
-    obj_player.y--;
+  if (obj_player.started) {
+    if (arduboy.pressed(UP_BUTTON)) {
+      obj_player.y--;
+    } else {
+      obj_player.y++;
+    }
   } else {
-    obj_player.y++;
+    if (arduboy.pressed(UP_BUTTON)) {
+      obj_player.started = 1;
+    }
   }
 
   // create bullet
@@ -134,10 +140,14 @@ void inggame() {
   backgroundshift++;
   backgroundshift%=8;
 
-  if (arduboy.pressed(UP_BUTTON)) {
-    Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipup, 0);
+  if (obj_player.started) {
+    if (arduboy.pressed(UP_BUTTON)) {
+      Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipup, 0);
+    } else {
+      Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipdown, 0);
+    }
   } else {
-    Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipdown, 0);
+    Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipmiddle, 0);
   }
 
   // draw bullets

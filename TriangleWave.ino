@@ -62,15 +62,20 @@ void inggame() {
   }
 
   // handle generation of sawblades
-  if (sawbladetimer == 29) {
-    for (int i=0; i < 10; i++) {
-      if (!obj_sawblade[i].active) {
-        obj_sawblade[i].x=127;
-        obj_sawblade[i].y=random(5,50);
-        obj_sawblade[i].active=1;
-        i = 11;
+  if (obj_player.started ) { 
+    if (sawbladetimer == 29) {
+      for (int i=0; i < 10; i++) {
+        if (!obj_sawblade[i].active) {
+          obj_sawblade[i].x=127;
+          obj_sawblade[i].y=random(5,50);
+          obj_sawblade[i].active=1;
+          i = 11;
+        }
       }
     }
+
+    sawbladetimer++;
+    sawbladetimer%=30;
   }
 
   // move bullets
@@ -128,8 +133,6 @@ void inggame() {
   if (obj_player.y > 53) {
     game_state=GAME_OVER;
   }
-  sawbladetimer++;
-  sawbladetimer%=30;
   
   arduboy.clear();
   
@@ -148,6 +151,8 @@ void inggame() {
     }
   } else {
     Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipmiddle, 0);
+    arduboy.setCursor(20,10);
+    arduboy.print("Hold Up to Fly!");
   }
 
   // draw bullets

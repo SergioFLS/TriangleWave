@@ -160,7 +160,7 @@ void titlescreen() {
   arduboy.display();
 }
 
-void inggame() {
+void ingame() {
   if (!arduboy.nextFrame()) {
     return;
   }
@@ -223,7 +223,7 @@ void loop(){
       titlescreen();
       break;
     case IN_GAME:
-      inggame();
+      ingame();
       break;
     case GAME_OVER:
       gameover();

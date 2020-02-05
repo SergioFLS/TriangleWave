@@ -15,84 +15,24 @@ void setup() {
   arduboy.clear();
 }
 
-void titlescreen() {
-  arduboy.clear();
-  arduboy.setCursor(0,0);
-  arduboy.print("Triangle Wave\nPress A to start");
-  if (arduboy.pressed(A_BUTTON)) {
-    game_state = IN_GAME;
+void createBullet() {
+  for (int i=0; i < 3; i++) {
+    if (! obj_bullet[i].active) {
+      obj_bullet[i].x = obj_player.x + 9;
+      obj_bullet[i].y = obj_player.y;
+      if (arduboy.pressed(UP_BUTTON)) {
+        obj_bullet[i].yspd = -1;
+      } else {
+        obj_bullet[i].y += 9;
+        obj_bullet[i].yspd = 1;
+      }
+      obj_bullet[i].active = 1;
+      i = 4;
+    }
   }
-  arduboy.display();
 }
 
-void inggame() {
-  if (!arduboy.nextFrame()) {
-    return;
-  }
-  arduboy.pollButtons();
-
-  if (obj_player.started) {
-    if (arduboy.pressed(UP_BUTTON)) {
-      obj_player.y--;
-    } else {
-      obj_player.y++;
-    }
-  } else {
-    if (arduboy.pressed(UP_BUTTON)) {
-      obj_player.started = 1;
-    }
-  }
-
-  // create bullet
-  if (arduboy.justPressed(A_BUTTON)) {
-    for (int i=0; i < 3; i++) {
-      if (! obj_bullet[i].active) {
-        obj_bullet[i].x = obj_player.x + 9;
-        obj_bullet[i].y = obj_player.y;
-        if (arduboy.pressed(UP_BUTTON)) {
-          obj_bullet[i].yspd = -1;
-        } else {
-          obj_bullet[i].y += 9;
-          obj_bullet[i].yspd = 1;
-        }
-        obj_bullet[i].active = 1;
-        i = 4;
-      }
-    }
-  }
-
-  // handle generation of sawblades
-  if (obj_player.started ) { 
-    if (sawbladetimer == 29) {
-      for (int i=0; i < 10; i++) {
-        if (!obj_sawblade[i].active) {
-          obj_sawblade[i].x=127;
-          obj_sawblade[i].y=random(5,50);
-          obj_sawblade[i].active=1;
-          i = 11;
-        }
-      }
-    }
-
-    sawbladetimer++;
-    sawbladetimer%=30;
-  }
-
-  // move bullets
-  for (int i=0; i < 3; i++) {
-    if (obj_bullet[i].active) {
-      obj_bullet[i].x++;
-      obj_bullet[i].y+=obj_bullet[i].yspd;
-      if (obj_bullet[i].x > 129) {
-        obj_bullet[i].active = 0;
-      }
-
-      if (obj_bullet[i].y < 2 || obj_bullet[i].y > 62) {
-        obj_bullet[i].yspd*=-1;
-      }
-    }
-  }
-
+void handleCollision() {
   // collision detection between bullets and sawblades
   for (int i=0; i < 3; i++) {
     if (obj_bullet[i].active) {
@@ -108,6 +48,55 @@ void inggame() {
     }
   }
 
+  // collision detection between sawblades and the player
+  for (int i=0; i < 10; i++) {
+      if (obj_sawblade[i].active) {
+        if (obj_player.x + 8 == obj_sawblade[i].x && obj_sawblade[i].y < obj_player.y + 8 && obj_sawblade[i].y + 8 > obj_player.y) {
+          game_state=GAME_OVER;
+        }
+      }
+  }
+
+  // if the ship touches floor/ceil, game over
+  if (obj_player.y < 1 || obj_player.y > 53) {
+    game_state=GAME_OVER;
+  }
+}
+
+void sawbladeGen() {
+  if (obj_player.started ) { 
+    if (sawbladetimer == 29) {
+      for (int i=0; i < 10; i++) {
+        if (!obj_sawblade[i].active) {
+          obj_sawblade[i].x=127;
+          obj_sawblade[i].y=random(5,50);
+          obj_sawblade[i].active=1;
+          i = 11;
+        }
+      }
+    }
+
+    sawbladetimer++;
+    sawbladetimer%=30;
+  }
+}
+
+void moveBulSaw() {
+  // move bullets
+  for (int i=0; i < 3; i++) {
+    if (obj_bullet[i].active) {
+      obj_bullet[i].x++;
+      obj_bullet[i].y+=obj_bullet[i].yspd;
+      if (obj_bullet[i].x > 129) {
+        obj_bullet[i].active = 0;
+      }
+
+      if (obj_bullet[i].y < 2 || obj_bullet[i].y > 62) {
+        obj_bullet[i].yspd*=-1;
+      }
+    }
+  }
+
   // move sawblades
   for (int i=0; i < 10; i++) {
     if (obj_sawblade[i].active) {
@@ -117,33 +106,22 @@ void inggame() {
       }
     }
   }
+}
 
-  // collision detection between sawblades and the player
-  for (int i=0; i < 10; i++) {
-        if (obj_sawblade[i].active) {
-          if (obj_player.x + 8 == obj_sawblade[i].x && obj_sawblade[i].y < obj_player.y + 8 && obj_sawblade[i].y + 8 > obj_player.y) {
-            game_state=GAME_OVER;
-          }
-        }
-  }
+// draw functions
 
-  if (obj_player.y < 1) {
-    game_state=GAME_OVER;
-  }
-  if (obj_player.y > 53) {
-    game_state=GAME_OVER;
-  }
-  
-  arduboy.clear();
-  
+void drawBackground() {
   for (int backgroundx = 0; backgroundx < 136; backgroundx+=8) {
     Sprites::drawOverwrite(backgroundx + (backgroundshift * -1), 0, spr_groundup, 0);
     Sprites::drawOverwrite(backgroundx + (backgroundshift * -1), 56, spr_grounddown, 0);
   }
   backgroundshift++;
   backgroundshift%=8;
+}
 
+void drawPlayerObjs() {
   if (obj_player.started) {
+    // draw player
     if (arduboy.pressed(UP_BUTTON)) {
       Sprites::drawOverwrite(obj_player.x, obj_player.y, spr_shipup, 0);
     } else {
@@ -161,12 +139,65 @@ void inggame() {
       arduboy.fillRect(obj_bullet[i].x, obj_bullet[i].y, 1, 1, WHITE);
     }
   }
+}
 
+void drawSawblades() {
   for (int i=0; i < 10; i++) {
     if (obj_sawblade[i].active) {
       Sprites::drawOverwrite(obj_sawblade[i].x, obj_sawblade[i].y, spr_sawblade, 0);
     }
   }
+}
+
+void titlescreen() {
+  arduboy.clear();
+  arduboy.setCursor(0,0);
+  arduboy.print("Triangle Wave\nPress A to start");
+  if (arduboy.pressed(A_BUTTON)) {
+    game_state = IN_GAME;
+  }
+  arduboy.display();
+}
+
+void inggame() {
+  if (!arduboy.nextFrame()) {
+    return;
+  }
+  arduboy.pollButtons();
+
+  // make player float
+  if (obj_player.started) {
+    if (arduboy.pressed(UP_BUTTON)) {
+      obj_player.y--;
+    } else {
+      obj_player.y++;
+    }
+  } else {
+    if (arduboy.pressed(UP_BUTTON)) {
+      obj_player.started = 1;
+    }
+  }
+
+  // create bullet
+  if (arduboy.justPressed(A_BUTTON)) {
+    createBullet();
+  }
+  
+  // handle generation of sawblades
+  sawbladeGen();
+
+  // move bullets
+  moveBulSaw();
+
+  handleCollision();
+
+  //draw functions
+  arduboy.clear();
+  // draws moving floor and ceiling background
+  drawBackground();
+  // draw player, bullets and "hold up" message
+  drawPlayerObjs();
+  drawSawblades();
 
   arduboy.setCursor(0,0);
   arduboy.print(score);

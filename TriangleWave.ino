@@ -15,6 +15,7 @@ void setup() {
   arduboy.clear();
 }
 
+// update functions
 void createBullet() {
   for (int i=0; i < 3; i++) {
     if (! obj_bullet[i].active) {

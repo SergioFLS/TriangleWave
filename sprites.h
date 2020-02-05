@@ -5,7 +5,6 @@
 
 #ifndef SPRITES_H
 #define SPRITES_H
-#endif
 
 // images converted with
 // https://teamarg.github.io/arduboy-image-converter/
@@ -51,3 +50,5 @@ const unsigned char PROGMEM spr_sawblade[] =
 8, 8,
 0x2a, 0xbc, 0x43, 0xc2, 0x43, 0xc2, 0x3d, 0x54, 
 };
+
+#endif

@@ -5,7 +5,6 @@
 
 #ifndef VARIABLES_H
 #define VARIABLES_H
-#endif
 
 #define TITLE_SCREEN 0
 #define IN_GAME 1
@@ -42,7 +41,7 @@ void reset() {
   sawbladetimer = 0;
   score = 0;
   obj_player.x = 10;
-  obj_player.y = 24;
+  obj_player.y = 26;
   obj_player.started = 0;
   for (int i=0; i < 3; i++) {
     obj_bullet[i].active = 0;
@@ -51,3 +50,4 @@ void reset() {
     obj_sawblade[i].active = 0;
   }
 }
+#endif
